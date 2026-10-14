@@ -233,7 +233,7 @@ function updateVis(){
                     .attr('stroke-width', 1.5)
                     .attr('d', d => line(d[1]))        // d[1] = that station's points
                     .on('mouseover', function (event, d) {
-                        const info = d[1][0];          // any point has the station's lat/lon
+                        const info = d[1][0];
                         d3.select('#tooltip')
                             .style('display', 'block')
                             .html(
@@ -242,11 +242,18 @@ function updateVis(){
                                  Lon: ${info.longitude}`)
                             .style('left', (event.pageX + 20) + 'px')
                             .style('top', (event.pageY - 28) + 'px');
-                        d3.select(this).attr('stroke-width', 4); // emphasize hovered line
+
+                        svg.selectAll('.line').style('opacity', 0.1); // fade all lines
+                        d3.select(this)
+                            .style('opacity', 1)       // bring the hovered one back to full
+                            .attr('stroke-width', 4)   // and thicken it
+                            .raise();                  // move it in front of the faded ones
                     })
                     .on('mouseout', function (event, d) {
                         d3.select('#tooltip').style('display', 'none');
-                        d3.select(this).attr('stroke-width', 1.5);
+                        svg.selectAll('.line')
+                            .style('opacity', 1)       // restore all lines
+                            .attr('stroke-width', 1.5);
                     });
             },
             function(update){
@@ -259,6 +266,7 @@ function updateVis(){
                 return exit.remove();
             }
         );
+
 
 }
 
