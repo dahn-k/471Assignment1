@@ -14,9 +14,6 @@ let searchTerm = ''   // text typed into the station search box
 
 const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
-// The two choices for the Y axis
-const yOptions = ['TMIN', 'TMAX'];
-
 const t = 1000; // 1000ms = 1 second
 
 // Create SVG
@@ -76,14 +73,12 @@ function setupSelector(){
         addLegend();
     });
 
-    // --- Y dropdown (Category II: encoding change, TMIN vs TMAX) ---
-    d3.select('#yVariable')
-        .selectAll('option')
-        .data(yOptions)
-        .enter()
-        .append('option')
-        .text(d => d)
-        .attr('value', d => d);
+    // --- Y radio buttons (Category II: encoding change, TMIN vs TMAX) ---
+    d3.selectAll('input[name="yVar"]').on('change', function () {
+        yVar = d3.select(this).property('value');
+        updateAxes();
+        updateVis();
+    });
 
     d3.select('#yVariable').property('value', yVar);
 
@@ -285,7 +280,13 @@ function addLegend(){
 
     const entered = items.enter()
         .append('div')
-        .attr('class', 'legend-item');
+        .attr('class', 'legend-item')
+        .on('click', function (event, d) {       // d is the station name
+            // Toggle: click the active station again to clear, otherwise isolate it
+            searchTerm = (searchTerm === d) ? '' : d;
+            d3.select('#stationSearch').property('value', searchTerm); // keep the box in sync
+            applyHighlight();
+        });
 
     entered.append('span').attr('class', 'legend-swatch');
     entered.append('span').attr('class', 'legend-label');

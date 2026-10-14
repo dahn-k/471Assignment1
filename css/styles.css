@@ -72,6 +72,7 @@ p {
     margin: 0;                /* override the universal "margin: 0 auto" rule */
     font-size: 11px;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .legend-swatch {
@@ -87,4 +88,9 @@ p {
     padding: 6px 10px;
     font-size: 13px;
     width: 220px;
+}
+
+#controls label {
+    margin: 0 4px;
+    cursor: pointer;
 }
