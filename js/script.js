@@ -68,8 +68,14 @@ function setupSelector(){
 
     d3.select('#stateVariable').on('change', function () {
         selectedState = d3.select(this).property('value');
-        updateAxes();   // a new state has different temperature ranges
-        updateVis();
+
+        // Reset the search whenever the state changes
+        searchTerm = '';
+        d3.select('#stationSearch').property('value', '');          // clear the input box
+        d3.select('#stationOptions').selectAll('option').remove();  // clear stale suggestions
+
+        updateAxes();
+        updateVis();   // runs applyHighlight() with an empty term -> all lines show
         addLegend();
     });
 
