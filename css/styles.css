@@ -94,3 +94,7 @@ p {
     margin: 0 4px;
     cursor: pointer;
 }
+
+.line {
+    cursor: pointer;
+}

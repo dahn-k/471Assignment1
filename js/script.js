@@ -253,9 +253,16 @@ function updateVis(){
                     .on('mouseout', function (event, d) {
                         d3.select('#tooltip').style('display', 'none');
                         svg.selectAll('.line')
-                            .style('opacity', 1)       // restore all lines
+                            .style('opacity', 1)
                             .attr('stroke-width', 1.5);
+                    })
+                    .on('click', function (event, d) {
+                        const name = d[0];
+                        searchTerm = (searchTerm === name) ? '' : name;   // toggle isolate
+                        d3.select('#stationSearch').property('value', searchTerm);
+                        applyHighlight();
                     });
+                    
             },
             function(update){
                 return update
@@ -287,11 +294,35 @@ function addLegend(){
     const entered = items.enter()
         .append('div')
         .attr('class', 'legend-item')
-        .on('click', function (event, d) {       // d is the station name
-            // Toggle: click the active station again to clear, otherwise isolate it
+        .on('click', function (event, d) {          // d = station name
             searchTerm = (searchTerm === d) ? '' : d;
-            d3.select('#stationSearch').property('value', searchTerm); // keep the box in sync
+            d3.select('#stationSearch').property('value', searchTerm);
             applyHighlight();
+        })
+        .on('mouseover', function (event, d) {
+            // Dim all lines, bring this station's line forward (same as hovering the line)
+            svg.selectAll('.line').style('opacity', 0.1);
+            svg.selectAll('.line')
+                .filter(ld => ld[0] === d)          // the line whose station matches
+                .style('opacity', 1)
+                .attr('stroke-width', 4)
+                .raise();
+
+            // Show the same tooltip, pulling this station's info from the data
+            const info = allData.find(r => r.state === selectedState && r.station === d);
+            if (info) {
+                d3.select('#tooltip')
+                    .style('display', 'block')
+                    .html(`<strong>${info.station}</strong><br/>
+                           Lat: ${info.latitude}<br/>
+                           Lon: ${info.longitude}`)
+                    .style('left', (event.pageX + 20) + 'px')
+                    .style('top', (event.pageY - 28) + 'px');
+            }
+        })
+        .on('mouseout', function (event, d) {
+            d3.select('#tooltip').style('display', 'none');
+            svg.selectAll('.line').style('opacity', 1).attr('stroke-width', 1.5);
         });
 
     entered.append('span').attr('class', 'legend-swatch');
