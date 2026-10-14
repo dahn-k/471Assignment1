@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Stations: Temperature Over Time</title>
+    <link rel="stylesheet" href="css/styles.css">
+    
+</head>
+<body>
+    <div id="tooltip" style="display:none"></div> 
+
+    <div class="container"> <!-- Centers content and sets max width -->
+        <h1>Weather Stations: Temperature Over Time</h1>
+        <p>Each line is a weather station. Pick a state to see its stations,
+           switch the Y axis between daily minimum (TMIN) and maximum (TMAX)
+           temperature, and drag the slider handles to focus on a date range.
+           <br>Hover a line to see the station name and its coordinates. 
+        </p>
+        <div id="controls">
+
+            <p id="value"></p>
+            <div id="slider"></div>
+
+            State: <select id="stateVariable"></select>
+            Y: <select id="yVariable"></select>
+
+        </div>
+        <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
+    </div>
+
+    <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
+    <input type="text" id="stationSearch" placeholder="Search station…"
+               list="stationOptions" autocomplete="off">
+    <datalist id="stationOptions"></datalist>
+    <div id="legend"></div> <!-- Scrollable station color key -->
+
+    <!-- Load D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+    <script src="js/script.js"></script>
+
+
+    
+</body>
+</html>
