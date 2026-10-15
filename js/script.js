@@ -10,7 +10,8 @@ let selectedState       // which state's stations we draw; set after the data lo
 let dateRange           // [startDate, endDate] from the slider; set after the data loads
 let xScale, yScale
 let searchTerm = ''   // text typed into the station search box
-
+//used for longitude filters
+let longRange           // [minLong, maxLong] from the longitude slider
 
 const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
@@ -74,6 +75,7 @@ function setupSelector(){
         d3.select('#stationSearch').property('value', '');          // clear the input box
         d3.select('#stationOptions').selectAll('option').remove();  // clear stale suggestions
 
+        setupLongitudeSlider();   // new: rescale + reset the longitude filter
         updateAxes();
         updateVis();   // runs applyHighlight() with an empty term -> all lines show
         addLegend();
@@ -123,6 +125,10 @@ function setupSelector(){
         .attr('transform', 'translate(30,30)')
         .call(slider);
 
+    // --- Longitude-range slider (Category I: dynamic filter) ---
+    // Full date span across the data; the slider starts covering all of it.
+    setupLongitudeSlider();
+
     d3.select('#stationSearch').on('input', function () {
         searchTerm = d3.select(this).property('value');
         const term = searchTerm.trim().toLowerCase();
@@ -145,6 +151,38 @@ function setupSelector(){
         applyHighlight();
     });
     
+}
+
+//for the longitude
+function setupLongitudeSlider(){
+    const stateData = allData.filter(d => d.state === selectedState);
+    const minLong = d3.min(stateData, d => d.longitude);
+    const maxLong = d3.max(stateData, d => d.longitude);
+    longRange = [minLong, maxLong];          // reset the filter to the full range
+
+    // Remove the old slider before drawing the new one
+    d3.select('#sliderLong').selectAll('*').remove();
+
+    const sliderLongitude = d3
+        .sliderHorizontal()
+        .min(minLong)
+        .max(maxLong)
+        .width(width - 60)
+        .default([minLong, maxLong])
+        .fill('#5b8ff9')
+        .tickFormat(d3.format('.2f'))
+        .on('onchange', (val) => {
+            longRange = val;
+            updateVis();
+        });
+
+    d3.select('#sliderLong')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', 100)
+        .append('g')
+        .attr('transform', 'translate(30,30)')
+        .call(sliderLongitude);
 }
 
 function updateAxes(){
@@ -221,7 +259,13 @@ function updateVis(){
         .x(d => xScale(d.date))
         .y(d => yScale(d[yVar]));
 
-    // 5. One <path> per station (enter / update / exit, like the lab's circles)
+    // 5. color of longitude established
+    const lineColor = d => {
+        const lon = d[1][0].longitude;
+        return (lon >= longRange[0] && lon <= longRange[1]) ? colorScale(d[0]) : '#ccc';
+    };
+
+    // 6. One <path> per station (enter / update / exit, like the lab's circles)
     svg.selectAll('.line')
         .data(byStation, d => d[0])        // key by station name
         .join(
@@ -267,13 +311,18 @@ function updateVis(){
             function(update){
                 return update
                     .transition(t)
-                    .attr('stroke', d => colorScale(d[0]))
+                    // .attr('stroke', d => colorScale(d[0]))
+                    .attr('stroke', lineColor)
                     .attr('d', d => line(d[1]));
             },
             function(exit){
                 return exit.remove();
             }
         );
+    // 7. don't have gray lines drawn on top of colored ones
+    svg.selectAll('.line')
+    .filter(d => d[1][0].longitude >= longRange[0] && d[1][0].longitude <= longRange[1])
+    .raise();
 
 
 }
