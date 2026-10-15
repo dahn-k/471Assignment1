@@ -262,7 +262,7 @@ function updateVis(){
     // 5. color of longitude established
     const lineColor = d => {
         const lon = d[1][0].longitude;
-        return (lon >= longRange[0] && lon <= longRange[1]) ? colorScale(d[0]) : '#d9dddc';
+        return (lon >= longRange[0] && lon <= longRange[1]) ? colorScale(d[0]) : '#ccc';
     };
 
     // 6. One <path> per station (enter / update / exit, like the lab's circles)
